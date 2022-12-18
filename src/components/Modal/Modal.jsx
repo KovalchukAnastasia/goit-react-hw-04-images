@@ -1,44 +1,38 @@
-import React, { Component } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Overlay, ModalWindow } from './Modal.styled';
 
-class Modal extends Component {
-  static propTypes = {
-    closeModal: PropTypes.func.isRequired,
-    url: PropTypes.string,
-    alt: PropTypes.string,
-  };
-
-  componentDidMount() {
-    window.addEventListener('keydown', this.onEscapeClick);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onEscapeClick);
-  }
-
-  onBackdropClick = event => {
+export default function Modal({ closeModal, url, alt }) {
+  const onBackdropClick = event => {
     if (event.target === event.currentTarget) {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-  onEscapeClick = event => {
-    if (event.code === 'Escape') {
-      this.props.closeModal();
-    }
-  };
+  useEffect(() => {
+    const onEscapeClick = event => {
+      if (event.code === 'Escape') {
+        closeModal();
+      }
+    };
 
-  render() {
-    const { alt, url } = this.props;
-    return (
-      <Overlay onClick={this.onBackdropClick}>
-        <ModalWindow>
-          <img src={url} alt={alt} />
-        </ModalWindow>
-      </Overlay>
-    );
-  }
+    window.addEventListener('keydown', onEscapeClick);
+    return () => {
+      window.removeEventListener('keydown', onEscapeClick);
+    };
+  }, [closeModal]);
+
+  return (
+    <Overlay onClick={onBackdropClick}>
+      <ModalWindow>
+        <img src={url} alt={alt} />
+      </ModalWindow>
+    </Overlay>
+  );
 }
 
-export default Modal;
+Modal.propTypes = {
+  closeModal: PropTypes.func.isRequired,
+  url: PropTypes.string,
+  alt: PropTypes.string,
+};
